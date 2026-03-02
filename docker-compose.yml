@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: nanguayunpan-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: nanguayunpan
+      MYSQL_USER: nangua
+      MYSQL_PASSWORD: nangua123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+
+  # Redis 缓存
+  redis:
+    image: redis:6.2-alpine
+    container_name: nanguayunpan-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # 南瓜云盘应用
+  nanguayunpan:
+    build: .
+    container_name: nanguayunpan-app
+    ports:
+      - "7090:7090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nanguayunpan?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: nangua
+      SPRING_DATASOURCE_PASSWORD: nangua123
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      PROJECT_FOLDER: /app/storage/
+    volumes:
+      - file_storage:/app/storage
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:
+  file_storage:

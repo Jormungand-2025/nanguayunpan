@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nanguayunpan.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.nanguayunpan.entity.UserInfo">
+        <id column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="join_time" property="joinTime" jdbcType="TIMESTAMP"/>
+        <result column="last_login_time" property="lastLoginTime" jdbcType="TIMESTAMP"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="use_space" property="useSpace" jdbcType="BIGINT"/>
+        <result column="total_space" property="totalSpace" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id, nick_name, email, password, join_time, last_login_time, status, use_space, total_space
+    </sql>
+
+    <!-- 根据用户ID查询用户信息 -->
+    <select id="selectById" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 根据邮箱查询用户信息 -->
+    <select id="selectByEmail" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        WHERE email = #{email}
+    </select>
+
+    <!-- 插入用户信息 -->
+    <insert id="insert" parameterType="com.nanguayunpan.entity.UserInfo">
+        INSERT INTO user_info (
+            user_id, nick_name, email, password, join_time,
+            last_login_time, status, use_space, total_space
+        ) VALUES (
+                     #{userId}, #{nickName}, #{email}, #{password}, #{joinTime},
+                     #{lastLoginTime}, #{status}, #{useSpace}, #{totalSpace}
+                 )
+    </insert>
+
+    <!-- 更新用户信息 -->
+    <update id="updateById" parameterType="com.nanguayunpan.entity.UserInfo">
+        UPDATE user_info
+        <set>
+            <if test="nickName != null">nick_name = #{nickName},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="useSpace != null">use_space = #{useSpace},</if>
+            <if test="totalSpace != null">total_space = #{totalSpace},</if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 根据用户ID删除用户 -->
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM user_info WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 查询所有用户 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        ORDER BY join_time DESC
+    </select>
+
+    <!-- 根据状态查询用户 -->
+    <select id="selectByStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        WHERE status = #{status}
+        ORDER BY join_time DESC
+    </select>
+
+    <!-- 更新用户最后登录时间 -->
+    <update id="updateLastLoginTime" parameterType="java.lang.String">
+        UPDATE user_info
+        SET last_login_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 更新用户空间使用情况 -->
+    <update id="updateUseSpace">
+        UPDATE user_info
+        SET use_space = #{useSpace}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 根据昵称模糊查询用户 -->
+    <select id="selectByNickNameLike" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        WHERE nick_name LIKE CONCAT('%', #{nickName}, '%')
+        ORDER BY join_time DESC
+    </select>
+
+    <!-- 统计用户总数 -->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user_info
+    </select>
+
+    <!-- 分页查询用户 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        ORDER BY join_time DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+</mapper>

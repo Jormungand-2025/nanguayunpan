@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nanguayunpan.mapper.ShareMapper">
+
+    <resultMap id="BaseResultMap" type="com.nanguayunpan.entity.ShareInfo">
+        <id column="share_id" property="shareId" jdbcType="VARCHAR"/>
+        <result column="file_id" property="fileId" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="share_code" property="shareCode" jdbcType="VARCHAR"/>
+        <result column="share_url" property="shareUrl" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="expire_time" property="expireTime" jdbcType="TIMESTAMP"/>
+        <result column="share_type" property="shareType" jdbcType="INTEGER"/>
+        <result column="view_count" property="viewCount" jdbcType="INTEGER"/>
+        <result column="download_count" property="downloadCount" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        share_id, file_id, user_id, share_code, share_url, create_time, expire_time,
+        share_type, view_count, download_count, status, password
+    </sql>
+
+    <!-- 根据分享ID查询分享信息 -->
+    <select id="selectById" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE share_id = #{shareId}
+    </select>
+
+    <!-- 根据分享码查询分享信息 -->
+    <select id="selectByShareCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE share_code = #{shareCode}
+    </select>
+
+    <!-- 插入分享信息 -->
+    <insert id="insert" parameterType="com.nanguayunpan.entity.ShareInfo">
+        INSERT INTO share_info (
+            share_id, file_id, user_id, share_code, share_url, create_time,
+            expire_time, share_type, view_count, download_count, status, password
+        ) VALUES (
+                     #{shareId}, #{fileId}, #{userId}, #{shareCode}, #{shareUrl}, #{createTime},
+                     #{expireTime}, #{shareType}, #{viewCount}, #{downloadCount}, #{status}, #{password}
+                 )
+    </insert>
+
+    <!-- 更新分享信息 -->
+    <update id="updateById" parameterType="com.nanguayunpan.entity.ShareInfo">
+        UPDATE share_info
+        <set>
+            <if test="fileId != null">file_id = #{fileId},</if>
+            <if test="shareCode != null">share_code = #{shareCode},</if>
+            <if test="shareUrl != null">share_url = #{shareUrl},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="shareType != null">share_type = #{shareType},</if>
+            <if test="viewCount != null">view_count = #{viewCount},</if>
+            <if test="downloadCount != null">download_count = #{downloadCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="password != null">password = #{password},</if>
+        </set>
+        WHERE share_id = #{shareId}
+    </update>
+
+    <!-- 根据分享ID删除分享 -->
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM share_info WHERE share_id = #{shareId}
+    </delete>
+
+    <!-- 根据用户ID查询分享列表 -->
+    <select id="selectByUserId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据文件ID查询分享信息 -->
+    <select id="selectByFileId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE file_id = #{fileId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据状态查询分享列表 -->
+    <select id="selectByStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE status = #{status}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 统计用户分享数量 -->
+    <select id="selectCountByUserId" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM share_info WHERE user_id = #{userId}
+    </select>
+
+    <!-- 分页查询分享列表 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        ORDER BY create_time DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <!-- 查询过期分享 -->
+    <select id="selectExpiredShares" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE status = 1
+        AND expire_time IS NOT NULL
+        AND expire_time &lt; NOW()
+    </select>
+
+    <!-- 批量更新分享状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE share_info
+        SET status = #{status}
+        WHERE share_id IN
+        <foreach collection="shareIds" item="shareId" open="(" separator="," close=")">
+            #{shareId}
+        </foreach>
+    </update>
+
+    <!-- 根据分享码和用户ID查询分享信息 -->
+    <select id="selectByShareCodeAndUserId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE share_code = #{shareCode}
+        AND user_id = #{userId}
+    </select>
+
+    <!-- 统计分享总数 -->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM share_info
+    </select>
+
+    <!-- 获取热门分享（按查看次数排序） -->
+    <select id="selectPopularShares" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_info
+        WHERE status = 1
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
