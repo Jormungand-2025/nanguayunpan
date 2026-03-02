@@ -51,6 +51,27 @@
           AND status = 1
     </select>
 
+    <!-- 根据用户ID和父目录ID查询文件列表 -->
+    <select id="selectByUserIdAndPid" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM file_info
+        WHERE user_id = #{userId}
+          AND file_pid = #{filePid}
+          AND status = 1
+        ORDER BY folder_type DESC, create_time DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <!-- 根据用户ID和父目录ID统计文件数量 -->
+    <select id="selectCountByUserIdAndPid" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM file_info
+        WHERE user_id = #{userId}
+          AND file_pid = #{filePid}
+          AND status = 1
+    </select>
+
     <!-- 插入文件信息 -->
     <insert id="insert" parameterType="com.nanguayunpan.entity.FileInfo">
         INSERT INTO file_info (

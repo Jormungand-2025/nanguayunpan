@@ -153,7 +153,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ResponseVO getFileList(String filePid, Integer pageNo, Integer pageSize) {
+    public ResponseVO getFileList(String filePid, Integer pageNo, Integer pageSize, HttpServletRequest request) {
         try {
             // 参数校验和默认值设置
             if (StringUtils.isEmpty(filePid)) {
@@ -166,12 +166,18 @@ public class FileServiceImpl implements FileService {
                 pageSize = 10;
             }
 
+            // 从session或token中获取用户ID
+            String userId = ServiceUtils.getUserIdFromRequest(request);
+            if (StringUtils.isEmpty(userId)) {
+                return ResponseVO.error("用户未登录");
+            }
+
             // 计算分页参数
             int start = (pageNo - 1) * pageSize;
 
-            // 查询文件列表
-            List<FileInfo> fileList = fileMapper.selectByPid(filePid, start, pageSize);
-            int totalCount = fileMapper.selectCountByPid(filePid);
+            // 查询文件列表（按用户ID和父目录ID过滤）
+            List<FileInfo> fileList = fileMapper.selectByUserIdAndPid(userId, filePid, start, pageSize);
+            int totalCount = fileMapper.selectCountByUserIdAndPid(userId, filePid);
 
             // 构建返回结果
             Map<String, Object> result = new HashMap<>();

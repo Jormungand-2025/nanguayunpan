@@ -30,6 +30,20 @@ public interface FileMapper {
     int selectCountByPid(@Param("filePid") String filePid);
 
     /**
+     * 根据用户ID和父目录ID查询文件列表
+     */
+    List<FileInfo> selectByUserIdAndPid(@Param("userId") String userId,
+                                       @Param("filePid") String filePid,
+                                       @Param("start") int start,
+                                       @Param("pageSize") int pageSize);
+
+    /**
+     * 根据用户ID和父目录ID统计文件数量
+     */
+    int selectCountByUserIdAndPid(@Param("userId") String userId,
+                                  @Param("filePid") String filePid);
+
+    /**
      * 插入文件信息
      */
     int insert(FileInfo fileInfo);

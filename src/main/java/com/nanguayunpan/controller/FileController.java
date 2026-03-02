@@ -42,8 +42,9 @@ public class FileController {
     @RequestMapping("/list")
     public ResponseVO getFileList(@RequestParam String filePid,
                                   @RequestParam(required = false) Integer pageNo,
-                                  @RequestParam(required = false) Integer pageSize) {
-        return fileService.getFileList(filePid, pageNo, pageSize);
+                                  @RequestParam(required = false) Integer pageSize,
+                                  HttpServletRequest request) {
+        return fileService.getFileList(filePid, pageNo, pageSize, request);
     }
 
     /**

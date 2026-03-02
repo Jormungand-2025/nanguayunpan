@@ -24,7 +24,7 @@ public interface FileService {
     /**
      * 获取文件列表
      */
-    ResponseVO getFileList(String filePid, Integer pageNo, Integer pageSize);
+    ResponseVO getFileList(String filePid, Integer pageNo, Integer pageSize, HttpServletRequest request);
 
     /**
      * 创建文件夹
